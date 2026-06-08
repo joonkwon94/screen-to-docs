@@ -9,11 +9,11 @@ from gemini_vision import analyze_image_with_gemini, reset_chat_session
 from docs_integration import send_to_docs
 
 # 설정: 단축키 지정
-NEW_DOC_HOTKEY = 'ctrl+shift+n'
-CAPTURE_HOTKEY = 'ctrl+shift+s'
-FINISH_HOTKEY = 'ctrl+shift+f'
-SET_LOC_HOTKEY = 'ctrl+shift+l'
-AUTO_HOTKEY = 'ctrl+shift+a'
+NEW_DOC_HOTKEY = 'ctrl+alt+n'
+CAPTURE_HOTKEY = 'ctrl+alt+s'
+FINISH_HOTKEY = 'ctrl+alt+f'
+SET_LOC_HOTKEY = 'ctrl+alt+l'
+AUTO_HOTKEY = 'ctrl+alt+a'
 
 TEMP_IMAGE_PATH = 'screenshot_temp.png'
 SESSION_ID = str(uuid.uuid4())
@@ -62,7 +62,7 @@ def on_set_location_pressed():
     global next_btn_pos
     next_btn_pos = pyautogui.position()
     print(f"\n[{time.strftime('%H:%M:%S')}] 📍 '우클릭'할 Next 버튼 위치 저장 완료: {next_btn_pos}")
-    print("이제 자동 수면모드(Ctrl+Shift+A)를 실행할 수 있습니다.")
+    print("이제 자동 수면모드(Ctrl+Alt+A)를 실행할 수 있습니다.")
 
 def auto_pilot_thread(loop_count):
     global is_auto_running
@@ -96,7 +96,7 @@ def on_auto_pilot_pressed():
         return
         
     if next_btn_pos is None:
-        print("\n[Error] Next 버튼 위치가 없습니다. 마우스를 버튼에 올리고 Ctrl+Shift+L을 먼저 눌러주세요!")
+        print("\n[Error] Next 버튼 위치가 없습니다. 마우스를 버튼에 올리고 Ctrl+Alt+L을 먼저 눌러주세요!")
         return
         
     # 팝업을 띄워 원하는 장수(페이지 수)를 입력받음
