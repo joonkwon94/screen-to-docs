@@ -2,40 +2,55 @@ function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const textToAdd = data.text;
-    const sessionId = data.session_id; // 파이썬이 실행될 때마다 고유한 세션 ID를 보냅니다.
-    
-    if (!textToAdd) {
-       return ContentService.createTextOutput("텍스트가 없습니다.").setMimeType(ContentService.MimeType.TEXT);
-    }
+    const sessionId = data.session_id; 
+    const action = data.action || "append"; // 기본값은 내용 추가
     
     const props = PropertiesService.getScriptProperties();
     let docId = props.getProperty(sessionId);
     let doc;
     
-    // 이 세션(현재 파이썬 실행)에서 이미 만들어진 문서가 있다면 그걸 엽니다.
+    // 세션 종료 요청이 온 경우
+    if (action === "finish") {
+      if (docId) {
+        doc = DocumentApp.openById(docId);
+        const body = doc.getBody();
+        body.appendParagraph('\n==================================================');
+        body.appendParagraph('✅ 모든 스크린샷 캡처 작업이 완료되었습니다. (기록 종료)');
+        body.appendParagraph('==================================================\n');
+        doc.saveAndClose();
+        
+        // 세션 아이디 삭제 (더 이상 이 문서에 추가되지 않도록 잠금)
+        props.deleteProperty(sessionId);
+        return ContentService.createTextOutput("Session Finished").setMimeType(ContentService.MimeType.TEXT);
+      }
+      return ContentService.createTextOutput("No active session").setMimeType(ContentService.MimeType.TEXT);
+    }
+    
+    // 일반적인 캡처(append) 요청인 경우
+    if (!textToAdd) {
+       return ContentService.createTextOutput("텍스트가 없습니다.").setMimeType(ContentService.MimeType.TEXT);
+    }
+    
     if (docId) {
       try {
         doc = DocumentApp.openById(docId);
       } catch(err) {
-        // 에러가 나면 새로 만듭니다.
         docId = null;
       }
     }
     
-    // 아직 만들어진 문서가 없다면 새 문서를 생성합니다.
     if (!docId) {
       const now = new Date();
       const timeString = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
       const docTitle = "스크린 캡처 작업물 - " + timeString;
       
       doc = DocumentApp.create(docTitle);
-      props.setProperty(sessionId, doc.getId()); // 이번 세션 ID에 생성된 문서 ID를 기억해둡니다.
+      props.setProperty(sessionId, doc.getId()); 
     }
     
     const body = doc.getBody();
     const currentTime = new Date().toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul' });
     
-    // 내용 추가
     body.appendParagraph('🕒 캡처 시간: ' + currentTime);
     body.appendParagraph(textToAdd);
     body.appendParagraph('--------------------------------------------------\n');

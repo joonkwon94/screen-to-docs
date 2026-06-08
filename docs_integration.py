@@ -6,7 +6,7 @@ load_dotenv()
 
 APPS_SCRIPT_URL = os.getenv("GOOGLE_APPS_SCRIPT_URL")
 
-def send_to_docs(text_content, session_id):
+def send_to_docs(text_content, session_id, action="append"):
     """
     추출된 텍스트를 Google Apps Script Web App URL로 전송합니다.
     """
@@ -18,7 +18,8 @@ def send_to_docs(text_content, session_id):
     
     payload = {
         "text": text_content,
-        "session_id": session_id
+        "session_id": session_id,
+        "action": action
     }
     
     try:
