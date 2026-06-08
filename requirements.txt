@@ -3,3 +3,4 @@ keyboard==0.13.5
 google-genai==0.3.0
 requests==2.31.0
 python-dotenv==1.0.1
+PyAutoGUI==0.9.54
