@@ -1,30 +1,47 @@
 function doPost(e) {
   try {
-    // 파이썬 프로그램에서 보낸 JSON 데이터 파싱
     const data = JSON.parse(e.postData.contents);
     const textToAdd = data.text;
+    const sessionId = data.session_id; // 파이썬이 실행될 때마다 고유한 세션 ID를 보냅니다.
     
     if (!textToAdd) {
        return ContentService.createTextOutput("텍스트가 없습니다.").setMimeType(ContentService.MimeType.TEXT);
     }
     
-    // 현재 시간 가져오기
-    const now = new Date();
-    const timeString = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
-    const docTitle = "스크린 캡처 요약 - " + timeString;
+    const props = PropertiesService.getScriptProperties();
+    let docId = props.getProperty(sessionId);
+    let doc;
     
-    // 구글 드라이브에 [새로운 문서 자동 생성] !!!
-    const doc = DocumentApp.create(docTitle);
+    // 이 세션(현재 파이썬 실행)에서 이미 만들어진 문서가 있다면 그걸 엽니다.
+    if (docId) {
+      try {
+        doc = DocumentApp.openById(docId);
+      } catch(err) {
+        // 에러가 나면 새로 만듭니다.
+        docId = null;
+      }
+    }
+    
+    // 아직 만들어진 문서가 없다면 새 문서를 생성합니다.
+    if (!docId) {
+      const now = new Date();
+      const timeString = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+      const docTitle = "스크린 캡처 작업물 - " + timeString;
+      
+      doc = DocumentApp.create(docTitle);
+      props.setProperty(sessionId, doc.getId()); // 이번 세션 ID에 생성된 문서 ID를 기억해둡니다.
+    }
+    
     const body = doc.getBody();
+    const currentTime = new Date().toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul' });
     
-    // 문서에 내용 작성
-    body.appendParagraph('🕒 스크랩 시간: ' + timeString);
-    body.appendParagraph('--------------------------------------------------');
+    // 내용 추가
+    body.appendParagraph('🕒 캡처 시간: ' + currentTime);
     body.appendParagraph(textToAdd);
+    body.appendParagraph('--------------------------------------------------\n');
     
     doc.saveAndClose();
     
-    // 성공 시 문서 URL 반환
     return ContentService.createTextOutput("Success: " + doc.getUrl()).setMimeType(ContentService.MimeType.TEXT);
     
   } catch (error) {

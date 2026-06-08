@@ -1,5 +1,6 @@
 import os
 import time
+import uuid
 import keyboard
 from capture import capture_screen, save_image_temp
 from gemini_vision import analyze_image_with_gemini
@@ -8,6 +9,9 @@ from docs_integration import send_to_docs
 # 설정: 이 단축키를 누르면 캡처 및 전송이 시작됩니다.
 HOTKEY = 'ctrl+shift+s'
 TEMP_IMAGE_PATH = 'screenshot_temp.png'
+
+# 이번 실행에 대한 고유 세션 ID 생성
+SESSION_ID = str(uuid.uuid4())
 
 print("==========================================")
 print(f" Screen-to-Docs 자동화 프로그램 시작됨 ")
@@ -33,8 +37,8 @@ def on_hotkey_pressed():
         print(extracted_text)
         print("--------------------------\n")
         
-        # 3. Google Docs로 전송
-        send_to_docs(extracted_text)
+        # 3. Google Docs로 전송 (세션 ID 포함)
+        send_to_docs(extracted_text, SESSION_ID)
     else:
         print("[Process] 추출된 텍스트가 없거나 에러가 발생하여 전송하지 않습니다.")
     
