@@ -49,9 +49,7 @@ function doPost(e) {
     }
     
     const body = doc.getBody();
-    const currentTime = new Date().toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul' });
     
-    body.appendParagraph('🕒 캡처 시간: ' + currentTime);
     body.appendParagraph(textToAdd);
     body.appendParagraph('--------------------------------------------------\n');
     
